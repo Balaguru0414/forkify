@@ -8,7 +8,8 @@ export const state = {
     results : [],
     page : 1,
     resultsPerPage : RES_PER_PAGE,
-  }
+  },
+  bookmarks : [],
 }
 
 export const loadRecipe = async function (id) {
@@ -26,6 +27,11 @@ export const loadRecipe = async function (id) {
       cookingTime : recipe.cooking_time,
       ingredients : recipe.ingredients
     };
+
+    if (state.bookmarks.some(bookmark => bookmark.id === id))
+      state.recipe.bookmarked = true;
+    else state.recipe.bookmarked = false;
+
   console.log(state.recipe);
   } catch (err) {
     // Temp error handing
@@ -50,7 +56,7 @@ export const loadSearchResults = async function (query) {
       };
     });
 
-    // console.log(state.search.results);
+    state.search.page = 1;
   } catch (err) {
     console.error(`${err} ❌❌❌`);
     throw err;
@@ -75,10 +81,66 @@ export const updateServings = function (newServings) {
   state.recipe.servings = newServings;
 };
 
+const persistBookmarks= function () {
+  localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks))
+};
 
+export const addBookmark = function (recipe) {
+  // add Bookmark
+  state.bookmarks.push(recipe);
 
+  // mark current recipe as bookmarked
+  if (recipe.id === state.recipe.id) state.recipe.bookmarked = true;
 
+  persistBookmarks();
+};
 
+export const deleteBookmark = function (id) {
+  // delete bookmark
+  const index = state.bookmarks.findIndex(el => el.id === id)
+  state.bookmarks.splice(index, 1);
 
+  // mark current recipe as Not bookmarked
+  if (id === state.recipe.id) state.recipe.bookmarked = false;
+
+  persistBookmarks();
+};
+
+const init = function() {
+  const storage = localStorage.getItem('bookmarks');
+  if (storage) state.bookmarks = JSON.parse(storage);
+};
+init();
+// console.log(state.bookmarks)
+
+const clearBookmarks = function () {
+  localStorage.clear('bookmarks');
+};
+// clearBookmarks()
+
+export const uploadRecipe = async function (newRecipe) {
+    try {const ingredients = Object.entries(newRecipe)
+        .filter(entry => entry[0].startsWith('ingredient') && entry[1] !== '')
+        .map(ing => {
+          const ingArr = ing[1].replaceAll(' ','').split(',');
+          if (ingArr.length !== 3) throw new Error('Wrong ingredient format! Please use the correct format 😞');
+          const [quantity,unit,description] = ingArr;
+          return {quantity : quantity ? +quantity : null,unit,description}
+        })
+
+    const recipe = {
+      title : newRecipe.title,
+      publisher : newRecipe.publisher,
+      sourceUrl : newRecipe.sourceUrl,
+      image : newRecipe.image,
+      servings : +newRecipe.servings,
+      cookingTime : +newRecipe.cookingTime,
+      ingredients,
+    };
+      console.log(recipe);
+  } catch (err) {
+    throw err;
+  };  
+};
 
 

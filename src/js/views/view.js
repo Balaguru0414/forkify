@@ -1,62 +1,78 @@
-import icons from '../../img/icons.svg';
+import icons from "../../img/icons.svg";
 
 export default class View {
-	_data;
+  _data;
 
-	render(data, render = true){
-		if (!data || Array.isArray(data) && data.length === 0) return this.renderError();
+  /**
+  * Render the received object to the DOM
+  * @param {Object | Object[]} data The data to be rendered (e.g. recipe)
+  * @param {boolean} [render=true] if false, create markup string instead of rendering to the DOM
+  * @returns {undefined | string} a markup string is returned if render=false
+  * @this {Object} View instance
+  * @author Bala Guru
+  * @todo Finish the implementation
+  */
 
-		this._data = data;
-		const markup = this._generateMarkup();
+  render(data, render = true) {
+    if (!data || (Array.isArray(data) && data.length === 0))
+      return this.renderError();
 
-		if (!render) return markup;
+    this._data = data;
+    const markup = this._generateMarkup();
 
-		this._clear();
-		this._parentElement.insertAdjacentHTML('afterbegin',markup);
-	}
+    if (!render) return markup;
 
-	update(data) {
-		this._data = data;
-		const newMarkup = this._generateMarkup();
+    this._clear();
+    this._parentElement.insertAdjacentHTML("afterbegin", markup);
+  }
 
-		const newDom = document.createRange().createContextualFragment(newMarkup);
-		const newElements = Array.from(newDom.querySelectorAll('*'));
-		const curElements = Array.from(this._parentElement.querySelectorAll('*'));
-		
-		newElements.forEach((newEl, i) => {
-			const curEl = curElements[i];
-			// console.log(curEl,newEl.isEqualNode(curEl));
+  update(data) {
+    this._data = data;
+    const newMarkup = this._generateMarkup();
 
-			// Update changed TEXT
-			if(!newEl.isEqualNode(curEl) && newEl.firstChild?.nodeValue.trim() !== '') {
-				// console.log(newEl.firstChild?.nodeValue.trim())
-				curEl.textContent = newEl.textContent;
-			}
+    const newDom = document.createRange().createContextualFragment(newMarkup);
+    const newElements = Array.from(newDom.querySelectorAll("*"));
+    const curElements = Array.from(this._parentElement.querySelectorAll("*"));
 
-			// Update Changed attribute
-			if (!newEl.isEqualNode(curEl))
-				Array.from(newEl.attributes).forEach(attr => curEl.setAttribute(attr.name,attr.value))
-		})
-	}
+    newElements.forEach((newEl, i) => {
+      const curEl = curElements[i];
+      // console.log(curEl,newEl.isEqualNode(curEl));
 
-	_clear (){
-		// console.log(this._parentElement)
-		this._parentElement.innerHTML = '';		
-	}
+      // Update changed TEXT
+      if (
+        !newEl.isEqualNode(curEl) &&
+        newEl.firstChild?.nodeValue.trim() !== ""
+      ) {
+        // console.log(newEl.firstChild?.nodeValue.trim())
+        curEl.textContent = newEl.textContent;
+      }
 
-	renderSpinner () {
-  	const markup = `
+      // Update Changed attribute
+      if (!newEl.isEqualNode(curEl))
+        Array.from(newEl.attributes).forEach((attr) =>
+          curEl.setAttribute(attr.name, attr.value)
+        );
+    });
+  }
+
+  _clear() {
+    // console.log(this._parentElement)
+    this._parentElement.innerHTML = "";
+  }
+
+  renderSpinner() {
+    const markup = `
 	    <div class="spinner">
 	      <svg>
 	        <use href="${icons}#icon-loader"></use>
 	      </svg>
 	    </div>`;
-	    this._clear();
-	    this._parentElement.insertAdjacentHTML('afterbegin',markup);
-	}
+    this._clear();
+    this._parentElement.insertAdjacentHTML("afterbegin", markup);
+  }
 
-	renderError (message = this._errorMessage) {
-		const markup = `
+  renderError(message = this._errorMessage) {
+    const markup = `
 		  <div class="error">
             <div>
               <svg>
@@ -65,13 +81,13 @@ export default class View {
             </div>
             <p>${message}</p>
           </div>
-		`
-		this._clear();
-		this._parentElement.insertAdjacentHTML('afterbegin',markup);
-	}
+		`;
+    this._clear();
+    this._parentElement.insertAdjacentHTML("afterbegin", markup);
+  }
 
-	renderMessage (message = this._message) {
-		const markup = `
+  renderMessage(message = this._message) {
+    const markup = `
 		  <div class="message">
             <div>
               <svg>
@@ -80,8 +96,8 @@ export default class View {
             </div>
             <p>${message}</p>
           </div>
-		`
-		this._clear();
-		this._parentElement.insertAdjacentHTML('afterbegin',markup);
-	}
+		`;
+    this._clear();
+    this._parentElement.insertAdjacentHTML("afterbegin", markup);
+  }
 }
